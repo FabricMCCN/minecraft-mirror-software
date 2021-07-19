@@ -1,1 +1,11 @@
-package minecraft_mirror_software
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	// config.NewBaseConfig().LoadConfig()
+	fmt.Println(os.Getwd())
+}
