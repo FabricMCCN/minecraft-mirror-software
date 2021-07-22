@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/FabricMCCN/minecraft-mirror-software/logger"
@@ -22,7 +21,7 @@ type DownloadUtil struct {
 }
 
 func (d DownloadUtil) Download(url string, size int, storePath string) (string, error) {
-	if s, p := d.download(url, size, storePath); s {
+	if s, p := d.download(url, storePath); s {
 		return p.Name(), nil
 	}
 	return "", fmt.Errorf("download failed: %s", url)
@@ -42,7 +41,7 @@ func (d DownloadUtil) DownloadWithHashCheck(url string, size int, storePath stri
 	return f, nil
 }
 
-func (d DownloadUtil) download(url string, size int, storePath string) (status bool, file *os.File) {
+func (d DownloadUtil) download(url string, storePath string) (status bool, file *os.File) {
 	var f *os.File
 	var err error
 
@@ -67,19 +66,12 @@ func (d DownloadUtil) download(url string, size int, storePath string) (status b
 
 	var content []byte
 	var resp *http.Response
-	//retry for 4 times
-	for i := 0; i < 4; i++ {
-		resp, err = client.Get(url)
-		content, _ = ioutil.ReadAll(resp.Body)
-		if i, _ := strconv.Atoi(resp.Header.Get("Content-Length")); i == len(content) {
-			err = nil
-			break
-		}
-	}
+	content, _ = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error(fmt.Errorf("%w", err))
 		return false, f
 	}
 	f.Write(content)
+
 	return true, f
 }
